@@ -8,35 +8,37 @@ var v_cx = [];
 var v_cy = [];
 var distances_x = [];
 var distances_y = [];
-var laplacian = 0;
+var laplacian;
 var x_array = [];
 var y_array = [];
 var leader;
 var speed_limit;
+var stop_flag;
+var distance;
 
 function setup() {
     var canvas = createCanvas(windowWidth, 500);
     canvas.parent('#graphs')
-    total_agents = createSlider(0, 20, 1);
+    total_agents = createSlider(2, 20, 3);
     total_agents.parent('#total-agents');
     total_agents.changed(resetAgents);
     max_speed = createSlider(0, 20, 10);
     max_speed.parent('#max-speed');
+    inter_agent = createSlider(0, 300, 50);
+    inter_agent.parent('#inter-agent');
+    inter_agent.input(calculateDistance);
     a = createSprite(random(800), random(500), 10, 10);
     b = createSprite(random(800), random(500), 10, 10);
     c = createSprite(random(800), random(500), 10, 10);
-    distances_x = findDistances(3, 50, 'x');
-    distances_y = findDistances(3, 50, 'y');
-    adjecency = makeAdjecencyMatrix(3, 0);
+    calculateDistance();
     frameRate(60);
     angleMode(RADIANS);
-    laplacian = makeLaplacianMatrix(adjecency);
+    calculateScene();
 }
 
 function draw() {
     background(200);
     drawSprites();
-    agents_count = allSprites.length;
     leader = parseInt($('#leader').val());
     updateLocations();
     speed_array_x = calculateSpeed(laplacian, position_array_x, distances_x);
@@ -54,12 +56,7 @@ function draw() {
 function mouseClicked() {
     if (mouseX < windowWidth && mouseY < 500) {
         createSprite(mouseX, mouseY, 10, 10);
-        structure = parseInt($('#graph_structure').val())
-        agents_count += 1;
-        distances_x = findDistances(agents_count, 50, 'x');
-        distances_y = findDistances(agents_count, 50, 'y');
-        adjecency = makeAdjecencyMatrix(agents_count, structure);
-        laplacian = makeLaplacianMatrix(adjecency);
+        calculateScene();
     }
 }
 
@@ -86,7 +83,8 @@ function updateVelocities(speed_record_x, speed_record_y) {
     for (i = 0; i < allSprites.length; i++) {
         s = allSprites[i];
         s.setVelocity(speed_record_x[i][0] / 20, speed_record_y[i][0] / 20);
-        s.limitSpeed(max_speed.value());
+        if (!stop_flag) s.limitSpeed(max_speed.value());
+        else s.limitSpeed(0);
     }
 }
 
@@ -116,8 +114,22 @@ function resetAgents() {
 
 function addMultipleSprites(n) {
     for (i = 0; i < n; i++) {
-        createSprite(canvas.height, canvas.width, 10, 10)
+        createSprite(random(canvas.width / 2), random(canvas.height / 2), 10, 10)
     }
+    calculateScene();
+}
+
+function startScene() {
+    stop_flag = false;
+}
+
+function stopScene() {
+    stop_flag = true;
+}
+
+function calculateDistance() {
+    distance = inter_agent.value();
+    calculateScene();
 }
 
 function draw_graph(agent, value_array) {

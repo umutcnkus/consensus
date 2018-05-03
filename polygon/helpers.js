@@ -151,3 +151,12 @@ function normalize_laplacian(array) {
         for (j = 0; j < length; j++) normalized_array[i][j] = -array[i][j] / abs(array[i][j]);
     return normalized_array;
 }
+
+function calculateScene() {
+    structure = parseInt($('#graph_structure').val())
+    agents_count = allSprites.length;
+    distances_x = findDistances(agents_count, distance, 'x');
+    distances_y = findDistances(agents_count, distance, 'y');
+    adjecency = makeAdjecencyMatrix(agents_count, structure);
+    laplacian = makeLaplacianMatrix(adjecency);
+}
