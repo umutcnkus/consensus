@@ -15,8 +15,50 @@
     <script src="addons/p5.dom.js"></script>
     <script src="addons/p5.play.js" type="text/javascript"></script>
     <script src="addons/numeric.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
 </head>
 
-<body> </body>
+<body>
+    <div id="graphs"></div>
+    <div class="container">
+        <div class="row">
+            <div id="col-4-1" class="col-4">
+                <br>
+                <button onclick="randomize()" class="btn-info btn-xs">Randomly Distribute</button>
+                <button class="btn-info btn-xs">Start</button>
+                <button class="btn-info btn-xs">Stop</button>
+            </div>
+            <div id="col-4-2" class="col-4">
+                <br>
+                <p>Leader</p>
+                <select default=0 id="leader" class="form-control form-control-sm">
+                    <optgroup label="Lider">
+                        <option value=0>No</option>
+                        <option value=1>Yes</option>
+                </select>
+                <br>
+                <p>Graph Topology</p>
+                <select default=0 id="graph_structure" class="form-control form-control-sm">
+                    <optgroup label="Graph Topology">
+                        <option value=0>Local</option>
+                        <option value=1>Global</option>
+                </select>
+            </div>
+            <div id="col-4-3" class="col-4">
+                <br>
+                <div id="total-agents">
+                    <p>Total Agents</p>
+                </div>
+                <div id="max-speed">
+                    <p>Max Speed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 
 </html>

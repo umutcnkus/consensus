@@ -98,10 +98,10 @@ function makeDistanceMatrix(distances) {
     return array;
 };
 
-function makeAdjecencyMatrix(n) {
+function makeAdjecencyMatrix(n, structure) {
     var array = createArray(n, n);
     for (i = 0; i < n; i++)
-        for (j = 0; j < n; j++) array[i][j] = 0;
+        for (j = 0; j < n; j++) array[i][j] = structure;
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
             if (i == 0) {
@@ -119,7 +119,6 @@ function makeAdjecencyMatrix(n) {
             }
         }
     }
-    console.log(array);
     return array;
 }
 
@@ -132,8 +131,7 @@ function makeLaplacianMatrix(adjacency) {
             else array[i][j] = -(adjacency[i].reduce(add) - adjacency[i][j]);
         }
     }
-    console.log(array)
-    return array
+    return array;
 }
 
 function createArray(length) {
