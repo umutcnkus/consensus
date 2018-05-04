@@ -58,14 +58,7 @@ function trapz(initial, time_series, array) {
     return cumulative_area;
 }
 
-function calculateSpeed(laplacian, agents, distances) {
-    d_x = numeric.dot(laplacian, agents);
-    normalized_la = normalize_laplacian(laplacian);
-    distances = numeric.dot(laplacian, distances);
-    d_x = numeric.add(d_x, distances);
-    return d_x
-}
-const add = (a, b) => a + b
+const add = (a, b) => a + b;
 
 function findDistances(n, magnitude, axis) {
     var distances = [];
@@ -76,8 +69,8 @@ function findDistances(n, magnitude, axis) {
         else distance += magnitude * sin(angle);
         distances.push([distance]);
     }
-    distances.unshift([0])
-    distances.pop()
+    distances.unshift([0]);
+    distances.pop();
     return distances;
 }
 
@@ -98,7 +91,7 @@ function makeDistanceMatrix(distances) {
     return array;
 };
 
-function makeAdjecencyMatrix(n, structure) {
+function makeAdjacencyMatrix(n, structure) {
     var array = createArray(n, n);
     for (i = 0; i < n; i++)
         for (j = 0; j < n; j++) array[i][j] = structure;
@@ -112,7 +105,7 @@ function makeAdjecencyMatrix(n, structure) {
                 array[i][0] = 1;
                 array[i][i - 1] = 1;
             }
-            else if (array[j][i]) array[i][j] = array[j][i]
+            else if (array[j][i]) array[i][j] = array[j][i];
             else {
                 array[i][i + 1] = 1;
                 array[i][i - 1] = 1;
@@ -135,8 +128,8 @@ function makeLaplacianMatrix(adjacency) {
 }
 
 function createArray(length) {
-    var arr = new Array(length || 0)
-        , i = length;
+    var arr = new Array(length || 0),
+        i = length;
     if (arguments.length > 1) {
         var args = Array.prototype.slice.call(arguments, 1);
         while (i--) arr[length - 1 - i] = createArray.apply(this, args);
@@ -150,13 +143,4 @@ function normalize_laplacian(array) {
     for (i = 0; i < length; i++)
         for (j = 0; j < length; j++) normalized_array[i][j] = -array[i][j] / abs(array[i][j]);
     return normalized_array;
-}
-
-function calculateScene() {
-    structure = parseInt($('#graph_structure').val())
-    agents_count = allSprites.length;
-    distances_x = findDistances(agents_count, distance, 'x');
-    distances_y = findDistances(agents_count, distance, 'y');
-    adjecency = makeAdjecencyMatrix(agents_count, structure);
-    laplacian = makeLaplacianMatrix(adjecency);
 }

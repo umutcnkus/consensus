@@ -9,6 +9,7 @@
             margin: 0;
         }
     </style>
+    <script src="agent.js"></script>
     <script src="sketch.js"></script>
     <script src="helpers.js"></script>
     <script src="addons/p5.min.js"></script>
@@ -28,36 +29,40 @@
         <div class="row">
             <div id="col-4-1" class="col-4">
                 <br>
-                <button onclick="randomize()" class="btn-info btn-xs">Randomly Distribute</button>
-                <button onclick="startScene()" class="btn-info btn-xs">Start</button>
-                <button onclick="stopScene()" class="btn-info btn-xs">Stop</button>
+                <button onclick="AgentManager.randomize()" class="btn btn-info btn-xs">Randomly Distribute</button>
+                <button onclick="AgentManager.startScene()" class="btn btn-info btn-xs">Start</button>
+                <button onclick="AgentManager.stopScene()" class="btn btn-info btn-xs">Stop</button>
             </div>
             <div id="col-4-2" class="col-4">
                 <br>
                 <p>Leader</p>
-                <select default=0 id="leader" class="form-control form-control-sm">
-                    <optgroup label="Lider">
-                        <option value=0>No</option>
-                        <option value=1>Yes</option>
+                <select default=0 id="leader" onchange="leaderMode=this.value" class="form-control form-control-sm">
+                    <optgroup label="Leader">
+                        <option value=>No</option>
+                        <option value=t>Yes</option>
                 </select>
                 <br>
                 <p>Graph Topology</p>
-                <select default=0 id="graph_structure" class="form-control form-control-sm">
+                <select default=0 id="graph_structure" onchange="AgentManager.updateStructure(parseInt(this.value))" class="form-control form-control-sm">
                     <optgroup label="Graph Topology">
                         <option value=0>Local</option>
                         <option value=1>Global</option>
+                    </optgroup>
                 </select>
             </div>
             <div id="col-4-3" class="col-4">
                 <br>
                 <div id="total-agents">
                     <p>Total Agents</p>
+                    <input onchange="AgentManager.resetAgents(parseInt(this.value))" type="range" min="2" max="20" value="3">
                 </div>
                 <div id="max-speed">
                     <p>Max Speed</p>
+                    <input oninput="AgentManager.updateMaxSpeed(parseInt(this.value))" type="range" min="0" max="20" value="10">
                 </div>
                 <div id="inter-agent">
                     <p>Inter-agent Distance</p>
+                    <input oninput="AgentManager.updateDistanceBetweenAgents(parseInt(this.value))" type="range" min="0" max="300" value="50">
                 </div>
             </div>
         </div>
