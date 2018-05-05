@@ -28,12 +28,12 @@ function draw() {
 
 
 function mouseClicked() {
-    if (mouseX < canvas.width && mouseY < canvas.height) {
+    if (isMouseOnCanvas()) {
         AgentManager.createAgent(mouseX, mouseY);
     }
 }
 
 
 function isMouseOnCanvas() {
-    return mouseX < canvas.width && mouseY < canvas.height;
+    return mouseX < canvas.width/2 && mouseY < canvas.height/2;
 }
