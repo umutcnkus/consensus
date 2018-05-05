@@ -4,7 +4,7 @@ var AgentManager = function() {
 
     this.maxSpeed = 10;
     this.distanceBetweenAgents = 50;
-    this.structure = 1;
+    this.structure = 0;
     this.stopFlag = false;
 
     this.laplacian = [];
