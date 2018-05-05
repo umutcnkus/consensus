@@ -35,5 +35,5 @@ function mouseClicked() {
 
 
 function isMouseOnCanvas() {
-    return mouseX < canvas.width/2 && mouseY < canvas.height/2;
+    return mouseX < canvas.width && mouseY < canvas.height;
 }
