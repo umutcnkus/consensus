@@ -109,8 +109,8 @@ var AgentManager = function() {
 
     this.randomize = () => {
         for (i = 0; i < allSprites.length; i++) {
-            allSprites[i].position.x = random(canvas.width);
-            allSprites[i].position.y = random(canvas.height);
+            allSprites[i].position.x = random(canvas.width/2);
+            allSprites[i].position.y = random(canvas.height/2);
         }
     };
 
