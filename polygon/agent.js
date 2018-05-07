@@ -18,7 +18,7 @@ var AgentManager = function() {
 
     this.initialize = () => {
         for (let i = 0; i < 3; i ++) {
-            AgentManager.createAgent(random(canvas.width), random(canvas.height));
+            AgentManager.createAgent(random(canvasWidth), random(canvasHeight));
         }
     };
 
@@ -30,8 +30,8 @@ var AgentManager = function() {
 
     this.createMultipleAgents = (numOfAgents) => {
         for (i = 0; i < numOfAgents; i++) {
-            let x = random(canvas.width);
-            let y = random(canvas.height);
+            let x = random(canvasWidth);
+            let y = random(canvasHeight);
             createSprite(x, y, this.agentSize, this.agentSize);
         }
         this.agentCount = numOfAgents;
@@ -109,8 +109,8 @@ var AgentManager = function() {
 
     this.randomize = () => {
         for (i = 0; i < allSprites.length; i++) {
-            allSprites[i].position.x = random(canvas.width);
-            allSprites[i].position.y = random(canvas.height);
+            allSprites[i].position.x = random(canvasWidth);
+            allSprites[i].position.y = random(canvasHeight);
         }
     };
 

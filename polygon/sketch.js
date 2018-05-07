@@ -1,5 +1,6 @@
 var leaderMode = false;
 var canvasHeight = 500;
+var canvasWidth = $(window).width();
 
 var AgentManager = new AgentManager();
 
@@ -7,9 +8,9 @@ var AgentManager = new AgentManager();
 function setup() {
     frameRate(60);
     angleMode(RADIANS);
-
-    var canvas = createCanvas(windowWidth, canvasHeight);
+    var canvas = createCanvas(canvasWidth, canvasHeight);
     canvas.parent('#graphs');
+    
 
     AgentManager.showLinesBetweenAgents = true;
     AgentManager.initialize();
@@ -35,5 +36,5 @@ function mouseClicked() {
 
 
 function isMouseOnCanvas() {
-    return mouseX < canvas.width && mouseY < canvas.height;
+    return mouseX < canvasWidth && mouseY < canvasHeight;
 }
