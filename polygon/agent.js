@@ -130,6 +130,7 @@ var AgentManager = function() {
 
     this.updateStructure = (newStructure) => {
         this.structure = newStructure;
+        this.calculateScene();
     };
 
     this.setLeaderPosition = (x, y) => {
