@@ -12,7 +12,7 @@ function setup() {
     canvas.parent('#graphs');
     
 
-    AgentManager.showLinesBetweenAgents = true;
+    AgentManager.showLinesBetweenAgents = false;
     AgentManager.initialize();
 }
 
