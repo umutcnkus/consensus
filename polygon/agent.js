@@ -137,5 +137,9 @@ var AgentManager = function() {
         allSprites[0].position.x = x;
         allSprites[0].position.y = y;
     };
+    
+    this.setLineVisibility = (visibility) => {
+        this.showLinesBetweenAgents = visibility;
+    };
 
 };

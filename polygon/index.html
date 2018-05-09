@@ -35,13 +35,18 @@
             </div>
             <div id="col-4-2" class="col-4">
                 <br>
-                <p>Leader</p>
-                <select default=0 id="leader" onchange="leaderMode=this.value" class="form-control form-control-sm">
-                    <optgroup label="Leader">
-                        <option value=>No</option>
-                        <option value=t>Yes</option>
-                </select>
+                <label class="custom-control custom-checkbox">
+                    <input oninput="leaderMode=$(this).is(':checked')" type="checkbox" class="custom-control-input">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">Leader following mode</span>
+                </label>
                 <br>
+                <label class="custom-control custom-checkbox">
+                    <input oninput="AgentManager.setLineVisibility($(this).is(':checked'))" type="checkbox" class="custom-control-input">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">Show communication lines</span>
+                </label>
+                
                 <p>Graph Topology</p>
                 <select default=0 id="graph_structure" onchange="AgentManager.updateStructure(parseInt(this.value))" class="form-control form-control-sm">
                     <optgroup label="Graph Topology">
@@ -49,6 +54,7 @@
                         <option value=1>Global</option>
                     </optgroup>
                 </select>
+                <br>
             </div>
             <div id="col-4-3" class="col-4">
                 <br>
