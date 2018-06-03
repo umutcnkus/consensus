@@ -90,13 +90,21 @@ var AgentManager = function() {
     this.showLines = () => {
         for (i = 0; i < allSprites.length; i++) {
             s1 = allSprites[i];
-            if (i != allSprites.length - 1) {
-                s2 = allSprites[i + 1];
-                line(s1.position.x, s1.position.y, s2.position.x, s2.position.y);
-            } else {
-                line(s1.position.x, s1.position.y, allSprites[0].position.x, allSprites[0].position.y);
+            if (this.structure === 0) {
+                if (i != allSprites.length - 1) {
+                    s2 = allSprites[i + 1];
+                    line(s1.position.x, s1.position.y, s2.position.x, s2.position.y);
+                } else {
+                    line(s1.position.x, s1.position.y, allSprites[0].position.x, allSprites[0].position.y);
+                }
+            } else if (this.structure === 1) {
+                for (j = 0; j < allSprites.length; j++) {
+                    s2 = allSprites[j];
+                    line(s1.position.x, s1.position.y, s2.position.x, s2.position.y);
+                }
             }
         }
+
     };
 
     this.startScene = () => {
