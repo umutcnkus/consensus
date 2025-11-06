@@ -93,25 +93,95 @@ function makeDistanceMatrix(distances) {
 
 function makeAdjacencyMatrix(n, structure) {
     var array = createArray(n, n);
-    for (i = 0; i < n; i++)
-        for (j = 0; j < n; j++) array[i][j] = structure;
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
-            if (i == 0) {
-                array[i][n - 1] = 1;
-                array[i][i + 1] = 1;
-            }
-            else if (i == n - 1) {
-                array[i][0] = 1;
-                array[i][i - 1] = 1;
-            }
-            else if (array[j][i]) array[i][j] = array[j][i];
-            else {
-                array[i][i + 1] = 1;
-                array[i][i - 1] = 1;
-            }
+
+    // Initialize with zeros
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            array[i][j] = 0;
         }
     }
+
+    // No self-connections
+    for (let i = 0; i < n; i++) {
+        array[i][i] = 0;
+    }
+
+    switch(structure) {
+        case 0: // Ring (Local) - Each node connects to neighbors in a circle
+            for (let i = 0; i < n; i++) {
+                array[i][(i + 1) % n] = 1;
+                array[i][(i - 1 + n) % n] = 1;
+            }
+            break;
+
+        case 1: // Complete (Global) - Every node connects to every other node
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (i !== j) {
+                        array[i][j] = 1;
+                    }
+                }
+            }
+            break;
+
+        case 2: // Star - All nodes connect to a central hub (node 0)
+            for (let i = 1; i < n; i++) {
+                array[0][i] = 1;
+                array[i][0] = 1;
+            }
+            break;
+
+        case 3: // Path - Nodes form a linear chain
+            for (let i = 0; i < n - 1; i++) {
+                array[i][i + 1] = 1;
+                array[i + 1][i] = 1;
+            }
+            break;
+
+        case 4: // Random - Random connections with probability ~0.3
+            for (let i = 0; i < n; i++) {
+                for (let j = i + 1; j < n; j++) {
+                    if (Math.random() < 0.3) {
+                        array[i][j] = 1;
+                        array[j][i] = 1;
+                    }
+                }
+            }
+            // Ensure connectivity - add ring as base
+            for (let i = 0; i < n; i++) {
+                array[i][(i + 1) % n] = 1;
+                array[(i + 1) % n][i] = 1;
+            }
+            break;
+
+        case 5: // Small World - Ring with some random long-range connections
+            // Start with ring
+            for (let i = 0; i < n; i++) {
+                array[i][(i + 1) % n] = 1;
+                array[i][(i - 1 + n) % n] = 1;
+            }
+            // Add random long-range connections
+            const numLongRange = Math.max(1, Math.floor(n * 0.2));
+            for (let k = 0; k < numLongRange; k++) {
+                const i = Math.floor(Math.random() * n);
+                let j = Math.floor(Math.random() * n);
+                // Ensure j is not adjacent to i
+                while (j === i || j === (i + 1) % n || j === (i - 1 + n) % n) {
+                    j = Math.floor(Math.random() * n);
+                }
+                array[i][j] = 1;
+                array[j][i] = 1;
+            }
+            break;
+
+        default:
+            // Default to ring
+            for (let i = 0; i < n; i++) {
+                array[i][(i + 1) % n] = 1;
+                array[i][(i - 1 + n) % n] = 1;
+            }
+    }
+
     return array;
 }
 
