@@ -52,8 +52,32 @@ var AgentManager = function() {
     };
 
     this.createAgent = (x, y) => {
-        const sprite = createSprite(x, y, this.agentSize, this.agentSize);
+        const sprite = createSprite(x, y, this.agentSize * 2, this.agentSize * 2);
         sprite.shapeColor = color(this.colors.follower);
+        sprite.draw = function() {
+            // Custom draw function for better visuals
+            push();
+            translate(this.position.x, this.position.y);
+
+            // Draw shadow/glow
+            noStroke();
+            fill(0, 0, 0, 30);
+            ellipse(2, 2, this.width * 1.2, this.height * 1.2);
+
+            // Draw main circle
+            fill(this.shapeColor);
+            stroke(255, 255, 255, 200);
+            strokeWeight(2);
+            ellipse(0, 0, this.width, this.height);
+
+            // Draw inner highlight
+            noStroke();
+            fill(255, 255, 255, 80);
+            ellipse(-this.width * 0.15, -this.height * 0.15, this.width * 0.4, this.height * 0.4);
+
+            pop();
+        };
+
         this.agentCount += 1;
         this.agentTrails.push([]);
         this.calculateScene();
@@ -64,8 +88,31 @@ var AgentManager = function() {
         for (let i = 0; i < numOfAgents; i++) {
             let x = random(canvasWidth);
             let y = random(canvasHeight);
-            const sprite = createSprite(x, y, this.agentSize, this.agentSize);
+            const sprite = createSprite(x, y, this.agentSize * 2, this.agentSize * 2);
             sprite.shapeColor = color(this.colors.follower);
+            sprite.draw = function() {
+                // Custom draw function for better visuals
+                push();
+                translate(this.position.x, this.position.y);
+
+                // Draw shadow/glow
+                noStroke();
+                fill(0, 0, 0, 30);
+                ellipse(2, 2, this.width * 1.2, this.height * 1.2);
+
+                // Draw main circle
+                fill(this.shapeColor);
+                stroke(255, 255, 255, 200);
+                strokeWeight(2);
+                ellipse(0, 0, this.width, this.height);
+
+                // Draw inner highlight
+                noStroke();
+                fill(255, 255, 255, 80);
+                ellipse(-this.width * 0.15, -this.height * 0.15, this.width * 0.4, this.height * 0.4);
+
+                pop();
+            };
             this.agentTrails.push([]);
         }
         this.agentCount = numOfAgents;
@@ -236,14 +283,44 @@ var AgentManager = function() {
 
     this.drawLabels = () => {
         const isDarkMode = document.body.classList.contains('dark-mode');
-        fill(isDarkMode ? 255 : 0);
         textAlign(CENTER, CENTER);
-        textSize(10);
+        textSize(12);
+        textStyle(BOLD);
 
         for (let i = 0; i < allSprites.length; i++) {
             const s = allSprites[i];
             const label = i === 0 ? 'L' : i.toString();
+
+            // Draw label background for better readability
+            push();
+            noStroke();
+
+            // Determine label background color based on agent state
+            if (this.isAgentLocked(i)) {
+                fill(this.colors.locked);
+            } else if (this.isAgentSelected(i)) {
+                fill(this.colors.selected);
+            } else if (i === 0) {
+                fill(this.colors.leader);
+            } else {
+                fill(isDarkMode ? 50 : 255);
+            }
+
+            // Draw label background circle
+            ellipse(s.position.x, s.position.y, 18, 18);
+
+            // Draw label text
+            fill(255);
+            stroke(0, 0, 0, 100);
+            strokeWeight(3);
             text(label, s.position.x, s.position.y);
+
+            // Draw text again without stroke for crisp appearance
+            noStroke();
+            fill(255);
+            text(label, s.position.x, s.position.y);
+
+            pop();
         }
     };
 
@@ -657,10 +734,10 @@ var AgentManager = function() {
 
     this.updateAgentSize = (size) => {
         this.agentSize = size;
-        // Update all existing sprites
+        // Update all existing sprites (multiply by 2 for circle diameter)
         for (let i = 0; i < allSprites.length; i++) {
-            allSprites[i].width = size;
-            allSprites[i].height = size;
+            allSprites[i].width = size * 2;
+            allSprites[i].height = size * 2;
         }
     };
 

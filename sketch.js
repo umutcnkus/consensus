@@ -94,7 +94,12 @@ function draw() {
     updateMetrics();
 }
 
-function mousePressed() {
+function mousePressed(event) {
+    // Don't process if clicking on a button or control
+    if (event && event.target && event.target.tagName !== 'CANVAS') {
+        return true;
+    }
+
     if (isMouseOnCanvas()) {
         // Adjust mouse position for zoom
         const adjustedX = (mouseX - panX) / zoomLevel;
@@ -339,20 +344,44 @@ function setupEventListeners() {
         SimControls.toggleFullscreen();
     });
 
-    // Zoom controls (prevent propagation to canvas)
+    // Zoom controls (prevent all canvas interaction)
     document.getElementById('zoomInBtn').addEventListener('click', function(e) {
         e.stopPropagation();
+        e.preventDefault();
         SimControls.zoomIn();
+        return false;
+    });
+
+    document.getElementById('zoomInBtn').addEventListener('mousedown', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        return false;
     });
 
     document.getElementById('zoomOutBtn').addEventListener('click', function(e) {
         e.stopPropagation();
+        e.preventDefault();
         SimControls.zoomOut();
+        return false;
+    });
+
+    document.getElementById('zoomOutBtn').addEventListener('mousedown', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        return false;
     });
 
     document.getElementById('zoomResetBtn').addEventListener('click', function(e) {
         e.stopPropagation();
+        e.preventDefault();
         SimControls.zoomReset();
+        return false;
+    });
+
+    document.getElementById('zoomResetBtn').addEventListener('mousedown', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        return false;
     });
 }
 
