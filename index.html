@@ -168,6 +168,12 @@
                     <small class="text-muted">Multi-Agent Consensus Theory Visualization</small>
                 </div>
                 <div class="col-auto">
+                    <button id="screenshotBtn" class="btn btn-outline-success btn-sm me-2" title="Screenshot">
+                        <i class="bi bi-camera"></i>
+                    </button>
+                    <button id="fullscreenBtn" class="btn btn-outline-info btn-sm me-2" title="Fullscreen">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                    </button>
                     <button id="helpBtn" class="btn btn-outline-primary btn-sm me-2">
                         <i class="bi bi-question-circle"></i> Help
                     </button>
@@ -187,7 +193,26 @@
         <div class="row">
             <!-- Canvas Area -->
             <div class="col-lg-8">
-                <div id="canvas-container"></div>
+                <div id="canvas-container" style="position: relative;">
+                    <!-- Canvas Overlay Controls -->
+                    <div style="position: absolute; top: 10px; right: 10px; z-index: 10;">
+                        <div class="btn-group-vertical">
+                            <button id="zoomInBtn" class="btn btn-light btn-sm" title="Zoom In">
+                                <i class="bi bi-zoom-in"></i>
+                            </button>
+                            <button id="zoomOutBtn" class="btn btn-light btn-sm" title="Zoom Out">
+                                <i class="bi bi-zoom-out"></i>
+                            </button>
+                            <button id="zoomResetBtn" class="btn btn-light btn-sm" title="Reset Zoom">
+                                <i class="bi bi-aspect-ratio"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- FPS Counter -->
+                    <div id="fpsCounter" style="position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; font-family: monospace; font-size: 14px; display: none;">
+                        FPS: <span id="fpsValue">60</span>
+                    </div>
+                </div>
 
                 <!-- Metrics Dashboard -->
                 <div class="row">
@@ -365,6 +390,42 @@
                             <label class="form-check-label" for="showLabels">
                                 Show Agent Labels
                             </label>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="showGrid"
+                                   onchange="SimControls.toggleGrid(this.checked)">
+                            <label class="form-check-label" for="showGrid">
+                                Show Grid Overlay
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="showFPS"
+                                   onchange="SimControls.toggleFPS(this.checked)">
+                            <label class="form-check-label" for="showFPS">
+                                Show FPS Counter
+                            </label>
+                        </div>
+
+                        <!-- Agent Size -->
+                        <div class="range-container mt-3">
+                            <div class="range-label">
+                                <span>Agent Size</span>
+                                <span id="agentSizeValue">10</span>
+                            </div>
+                            <input type="range" class="form-range" min="5" max="20" value="10"
+                                   id="agentSizeSlider" oninput="SimControls.updateAgentSize(parseInt(this.value))">
+                        </div>
+
+                        <!-- Trail Length -->
+                        <div class="range-container">
+                            <div class="range-label">
+                                <span>Trail Length</span>
+                                <span id="trailLengthValue">50</span>
+                            </div>
+                            <input type="range" class="form-range" min="10" max="100" value="50"
+                                   id="trailLengthSlider" oninput="SimControls.updateTrailLength(parseInt(this.value))">
                         </div>
 
                         <hr>

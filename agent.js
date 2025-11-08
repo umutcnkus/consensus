@@ -32,6 +32,10 @@ var AgentManager = function() {
     this.selectedAgents = [];
     this.lockedAgents = [];
 
+    // Visual controls
+    this.showGrid = false;
+    this.gridSpacing = 50;
+
     // Color scheme for agents
     this.colors = {
         leader: '#ef4444',      // Red for leader
@@ -69,6 +73,9 @@ var AgentManager = function() {
     };
 
     this.showAgents = () => {
+        // Draw grid first (background)
+        this.drawGrid();
+
         this.updateLocations();
         this.calculateVelocities();
         this.updateVelocities();
@@ -603,5 +610,43 @@ var AgentManager = function() {
         }
 
         noStroke();
+    };
+
+    // Visual Control Methods
+    this.drawGrid = () => {
+        if (!this.showGrid) return;
+
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        stroke(isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)');
+        strokeWeight(1);
+
+        // Draw vertical lines
+        for (let x = 0; x <= canvasWidth; x += this.gridSpacing) {
+            line(x, 0, x, canvasHeight);
+        }
+
+        // Draw horizontal lines
+        for (let y = 0; y <= canvasHeight; y += this.gridSpacing) {
+            line(0, y, canvasWidth, y);
+        }
+
+        noStroke();
+    };
+
+    this.setGridVisibility = (visible) => {
+        this.showGrid = visible;
+    };
+
+    this.updateAgentSize = (size) => {
+        this.agentSize = size;
+        // Update all existing sprites
+        for (let i = 0; i < allSprites.length; i++) {
+            allSprites[i].width = size;
+            allSprites[i].height = size;
+        }
+    };
+
+    this.updateTrailLength = (length) => {
+        this.maxTrailLength = length;
     };
 };

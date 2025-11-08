@@ -2,13 +2,21 @@
 let leaderMode = false;
 let canvasHeight = 500;
 let canvasWidth = window.innerWidth > 1200 ? window.innerWidth * 0.65 : window.innerWidth * 0.95;
-let agentManager;
+let AgentManager;
 let metricsChart;
 let metricsData = {
     time: [],
     convergenceError: [],
     avgVelocity: []
 };
+
+// Zoom and FPS
+let zoomLevel = 1.0;
+let panX = 0;
+let panY = 0;
+let showFPSCounter = false;
+let fpsHistory = [];
+let lastFrameTime = 0;
 
 // Initialize on page load
 function setup() {
@@ -46,17 +54,37 @@ function setup() {
 }
 
 function draw() {
+    // Calculate FPS
+    if (showFPSCounter) {
+        const currentTime = millis();
+        const fps = 1000 / (currentTime - lastFrameTime);
+        lastFrameTime = currentTime;
+        fpsHistory.push(fps);
+        if (fpsHistory.length > 30) fpsHistory.shift();
+        const avgFPS = fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length;
+        document.getElementById('fpsValue').textContent = Math.round(avgFPS);
+    }
+
     // Dynamic background based on dark mode
     const isDarkMode = document.body.classList.contains('dark-mode');
     background(isDarkMode ? 30 : 200);
 
+    // Apply zoom and pan
+    push();
+    translate(panX, panY);
+    scale(zoomLevel);
+
     // Show agents and update visualization
-    agentManager.showAgents();
+    AgentManager.showAgents();
 
     // Leader following mode
     if (leaderMode && isMouseOnCanvas()) {
-    agentManager.setLeaderPosition(mouseX, mouseY);
+        const adjustedX = (mouseX - panX) / zoomLevel;
+        const adjustedY = (mouseY - panY) / zoomLevel;
+        AgentManager.setLeaderPosition(adjustedX, adjustedY);
     }
+
+    pop();
 
     // Update metrics every frame
     updateMetrics();
@@ -245,11 +273,11 @@ function updateMetrics() {
     if (frameCounter % 10 !== 0) return;
 
     // Calculate convergence error
-    const convergenceError = agentManager.calculateConvergenceError();
+    const convergenceError = AgentManager.calculateConvergenceError();
     document.getElementById('convergenceError').textContent = convergenceError.toFixed(2);
 
     // Calculate average velocity
-    const avgVelocity = agentManager.calculateAverageVelocity();
+    const avgVelocity = AgentManager.calculateAverageVelocity();
     document.getElementById('avgVelocity').textContent = avgVelocity.toFixed(2);
 
     // Update chart data
@@ -273,8 +301,8 @@ function updateMetrics() {
 }
 
 function updateAgentCountDisplay() {
-    document.getElementById('agentCount').textContent = agentManager.agentCount;
-    document.getElementById('agentCountValue').textContent = agentManager.agentCount;
+    document.getElementById('agentCount').textContent = AgentManager.agentCount;
+    document.getElementById('agentCountValue').textContent = AgentManager.agentCount;
 }
 
 // Setup event listeners
@@ -296,6 +324,29 @@ function setupEventListeners() {
     document.getElementById('helpBtn').addEventListener('click', function() {
         const modal = new bootstrap.Modal(document.getElementById('helpModal'));
         modal.show();
+    });
+
+    // Screenshot button
+    document.getElementById('screenshotBtn').addEventListener('click', function() {
+        SimControls.takeScreenshot();
+    });
+
+    // Fullscreen button
+    document.getElementById('fullscreenBtn').addEventListener('click', function() {
+        SimControls.toggleFullscreen();
+    });
+
+    // Zoom controls
+    document.getElementById('zoomInBtn').addEventListener('click', function() {
+        SimControls.zoomIn();
+    });
+
+    document.getElementById('zoomOutBtn').addEventListener('click', function() {
+        SimControls.zoomOut();
+    });
+
+    document.getElementById('zoomResetBtn').addEventListener('click', function() {
+        SimControls.zoomReset();
     });
 }
 
@@ -374,6 +425,57 @@ const SimControls = {
 
     toggleLeaderMode: function(enabled) {
         leaderMode = enabled;
+    },
+
+    toggleGrid: function(enabled) {
+        AgentManager.setGridVisibility(enabled);
+    },
+
+    toggleFPS: function(enabled) {
+        showFPSCounter = enabled;
+        document.getElementById('fpsCounter').style.display = enabled ? 'block' : 'none';
+        if (enabled) {
+            lastFrameTime = millis();
+        }
+    },
+
+    updateAgentSize: function(size) {
+        document.getElementById('agentSizeValue').textContent = size;
+        AgentManager.updateAgentSize(size);
+    },
+
+    updateTrailLength: function(length) {
+        document.getElementById('trailLengthValue').textContent = length;
+        AgentManager.updateTrailLength(length);
+    },
+
+    zoomIn: function() {
+        zoomLevel = Math.min(zoomLevel * 1.2, 3.0);
+    },
+
+    zoomOut: function() {
+        zoomLevel = Math.max(zoomLevel / 1.2, 0.5);
+    },
+
+    zoomReset: function() {
+        zoomLevel = 1.0;
+        panX = 0;
+        panY = 0;
+    },
+
+    takeScreenshot: function() {
+        saveCanvas('consensus-simulation', 'png');
+    },
+
+    toggleFullscreen: function() {
+        const elem = document.documentElement;
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {
+                console.log('Fullscreen error:', err);
+            });
+        } else {
+            document.exitFullscreen();
+        }
     },
 
     updateStatus: function() {
