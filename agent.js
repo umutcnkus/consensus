@@ -78,6 +78,7 @@ var AgentManager = function() {
         this.agentCount += 1;
         this.agentTrails.push([]);
         this.calculateScene();
+        this.calculateFormationTargets(); // Update formation when new agent is added
     };
 
     this.createMultipleAgents = (numOfAgents) => {
@@ -196,7 +197,8 @@ var AgentManager = function() {
                     const target = this.formationTargets[i];
                     const dx = target[0] - s.position.x;
                     const dy = target[1] - s.position.y;
-                    const formationForce = 0.02;
+                    // Increased force strength to make formation more visible
+                    const formationForce = 0.15;
                     totalVx += dx * formationForce;
                     totalVy += dy * formationForce;
                 }
@@ -422,6 +424,9 @@ var AgentManager = function() {
     this.setFormation = (formationType) => {
         this.formationType = formationType;
         this.calculateFormationTargets();
+
+        console.log('Formation set to:', formationType);
+        console.log('Formation targets:', this.formationTargets);
 
         // Show/hide formation size slider
         const container = document.getElementById('formationSizeContainer');
