@@ -209,7 +209,7 @@
                         </div>
                     </div>
                     <!-- FPS Counter -->
-                    <div id="fpsCounter" style="position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; font-family: monospace; font-size: 14px; display: none;">
+                    <div id="fpsCounter" style="position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; font-family: monospace; font-size: 14px; display: none; pointer-events: none;">
                         FPS: <span id="fpsValue">60</span>
                     </div>
                 </div>
@@ -224,7 +224,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <div class="metric-label">Convergence Error</div>
+                            <div class="metric-label">Position Spread</div>
                             <div class="metric-value" id="convergenceError">0.00</div>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
                 <!-- Chart -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Convergence Metrics Over Time</h5>
+                        <h5 class="card-title">Performance Metrics Over Time</h5>
                         <div class="chart-container">
                             <canvas id="metricsChart"></canvas>
                         </div>
@@ -512,8 +512,8 @@
                         <li>Watch convergence metrics in real-time</li>
                     </ul>
 
-                    <h6>Convergence Error</h6>
-                    <p>Measures how far agents are from reaching consensus. Lower values indicate better consensus.</p>
+                    <h6>Position Spread</h6>
+                    <p>Measures the average distance of agents from their center of mass. When all agents reach the same position (perfect consensus), this value becomes zero.</p>
                 </div>
             </div>
         </div>

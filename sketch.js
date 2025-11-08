@@ -92,49 +92,48 @@ function draw() {
 
 function mousePressed() {
     if (isMouseOnCanvas()) {
-        const agentIndex = AgentManager.getAgentAtPosition(mouseX, mouseY);
+        // Adjust mouse position for zoom
+        const adjustedX = (mouseX - panX) / zoomLevel;
+        const adjustedY = (mouseY - panY) / zoomLevel;
+        const agentIndex = AgentManager.getAgentAtPosition(adjustedX, adjustedY);
 
         if (agentIndex >= 0) {
             // Clicked on an agent
-            if (keyIsDown(SHIFT)) {
+            if (mouseButton === RIGHT) {
+                // Right-click: Delete agent
+                AgentManager.deleteAgent(agentIndex);
+                return false; // Prevent context menu
+            } else if (keyIsDown(SHIFT)) {
                 // Shift+Click: Toggle lock
                 AgentManager.toggleLock(agentIndex);
-            } else if (AgentManager.dragMode) {
+            } else if (AgentManager.dragMode && mouseButton === LEFT) {
                 // Start dragging
                 AgentManager.startDragging(agentIndex);
             } else {
                 // Just select
                 AgentManager.toggleSelection(agentIndex);
             }
-        } else if (!leaderMode) {
+        } else if (!leaderMode && mouseButton === LEFT) {
             // Clicked on empty space - create new agent
-            AgentManager.createAgent(mouseX, mouseY);
+            AgentManager.createAgent(adjustedX, adjustedY);
             updateAgentCountDisplay();
         }
     }
+    return false; // Prevent default
 }
 
 function mouseDragged() {
     if (isMouseOnCanvas() && AgentManager.dragMode && AgentManager.draggedAgent !== null) {
-        AgentManager.updateDrag(mouseX, mouseY);
+        // Adjust for zoom
+        const adjustedX = (mouseX - panX) / zoomLevel;
+        const adjustedY = (mouseY - panY) / zoomLevel;
+        AgentManager.updateDrag(adjustedX, adjustedY);
         return false; // Prevent default
     }
 }
 
 function mouseReleased() {
     AgentManager.stopDragging();
-}
-
-function mouseClicked(event) {
-    if (isMouseOnCanvas()) {
-        const agentIndex = AgentManager.getAgentAtPosition(mouseX, mouseY);
-
-        // Right-click: Delete agent
-        if (event.button === 2 && agentIndex >= 0) {
-            AgentManager.deleteAgent(agentIndex);
-            return false; // Prevent context menu
-        }
-    }
 }
 
 function isMouseOnCanvas() {
@@ -183,7 +182,7 @@ function initializeChart() {
         data: {
             labels: [],
             datasets: [{
-                label: 'Convergence Error',
+                label: 'Position Spread',
                 data: [],
                 borderColor: 'rgb(239, 68, 68)',
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -233,7 +232,7 @@ function initializeChart() {
                     position: 'left',
                     title: {
                         display: true,
-                        text: 'Convergence Error',
+                        text: 'Position Spread (0 = consensus)',
                         color: 'rgb(239, 68, 68)'
                     },
                     ticks: {
@@ -336,16 +335,19 @@ function setupEventListeners() {
         SimControls.toggleFullscreen();
     });
 
-    // Zoom controls
-    document.getElementById('zoomInBtn').addEventListener('click', function() {
+    // Zoom controls (prevent propagation to canvas)
+    document.getElementById('zoomInBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
         SimControls.zoomIn();
     });
 
-    document.getElementById('zoomOutBtn').addEventListener('click', function() {
+    document.getElementById('zoomOutBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
         SimControls.zoomOut();
     });
 
-    document.getElementById('zoomResetBtn').addEventListener('click', function() {
+    document.getElementById('zoomResetBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
         SimControls.zoomReset();
     });
 }
@@ -565,7 +567,7 @@ const SimControls = {
     },
 
     exportData: function() {
-        let csv = 'Time (frames),Convergence Error,Average Velocity\n';
+        let csv = 'Time (seconds),Position Spread,Average Velocity\n';
 
         for (let i = 0; i < metricsData.time.length; i++) {
             csv += `${metricsData.time[i]},${metricsData.convergenceError[i]},${metricsData.avgVelocity[i]}\n`;

@@ -78,10 +78,7 @@ var AgentManager = function() {
 
         this.updateLocations();
         this.calculateVelocities();
-        this.updateVelocities();
-
-        // Apply formation control
-        this.applyFormationControl();
+        this.updateVelocities(); // Now includes formation forces
 
         // Update trails
         if (this.showTrails) {
@@ -144,7 +141,28 @@ var AgentManager = function() {
     this.updateVelocities = () => {
         for (let i = 0; i < allSprites.length; i++) {
             const s = allSprites[i];
-            s.setVelocity(this.velocity_x[i][0] / 20, this.velocity_y[i][0] / 20);
+
+            // Set consensus velocity
+            const consensusVx = this.velocity_x[i][0] / 20;
+            const consensusVy = this.velocity_y[i][0] / 20;
+
+            // Add formation forces if applicable
+            let totalVx = consensusVx;
+            let totalVy = consensusVy;
+
+            if (this.formationType !== 'none' && this.formationTargets.length > 0 && i < this.formationTargets.length) {
+                if (!this.isAgentLocked(i)) {
+                    const target = this.formationTargets[i];
+                    const dx = target[0] - s.position.x;
+                    const dy = target[1] - s.position.y;
+                    const formationForce = 0.02;
+                    totalVx += dx * formationForce;
+                    totalVy += dy * formationForce;
+                }
+            }
+
+            s.setVelocity(totalVx, totalVy);
+
             if (!this.stopFlag) {
                 s.limitSpeed(this.maxSpeed);
             } else {
