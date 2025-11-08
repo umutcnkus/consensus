@@ -190,13 +190,8 @@ function makeLaplacianMatrix(adjacency) {
     var array = createArray(length, length);
     for (i = 0; i < length; i++) {
         for (j = 0; j < length; j++) {
-            if (i != j) {
-                // Off-diagonal: negative of adjacency
-                array[i][j] = -adjacency[i][j];
-            } else {
-                // Diagonal: degree of node i (sum of connections)
-                array[i][j] = adjacency[i].reduce(add, 0);
-            }
+            if (i != j) array[i][j] = adjacency[i][j];
+            else array[i][j] = -(adjacency[i].reduce(add) - adjacency[i][j]);
         }
     }
     return array;
