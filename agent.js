@@ -21,11 +21,24 @@ var AgentManager = function() {
     this.agentTrails = [];
     this.maxTrailLength = 50;
 
+    // Formation control
+    this.formationType = 'none';
+    this.formationSize = 100;
+    this.formationTargets = [];
+
+    // Interaction controls
+    this.dragMode = true;
+    this.draggedAgent = null;
+    this.selectedAgents = [];
+    this.lockedAgents = [];
+
     // Color scheme for agents
     this.colors = {
         leader: '#ef4444',      // Red for leader
         follower: '#3b82f6',    // Blue for followers
-        trail: '#94a3b8'        // Gray for trails
+        trail: '#94a3b8',       // Gray for trails
+        selected: '#fbbf24',    // Yellow for selected
+        locked: '#9333ea'       // Purple for locked
     };
 
     this.initialize = () => {
@@ -60,24 +73,41 @@ var AgentManager = function() {
         this.calculateVelocities();
         this.updateVelocities();
 
+        // Apply formation control
+        this.applyFormationControl();
+
         // Update trails
         if (this.showTrails) {
             this.updateTrails();
             this.drawTrails();
         }
 
+        // Draw formation targets
+        this.drawFormationTargets();
+
         // Draw communication lines
         if (this.showLinesBetweenAgents) {
             this.showLines();
         }
 
-        // Color the leader differently
-        if (allSprites.length > 0) {
-            allSprites[0].shapeColor = color(this.colors.leader);
+        // Color agents based on state
+        for (let i = 0; i < allSprites.length; i++) {
+            if (this.isAgentLocked(i)) {
+                allSprites[i].shapeColor = color(this.colors.locked);
+            } else if (this.isAgentSelected(i)) {
+                allSprites[i].shapeColor = color(this.colors.selected);
+            } else if (i === 0) {
+                allSprites[i].shapeColor = color(this.colors.leader);
+            } else {
+                allSprites[i].shapeColor = color(this.colors.follower);
+            }
         }
 
         // Draw sprites
         drawSprites();
+
+        // Draw selection indicators
+        this.drawSelectionIndicators();
 
         // Draw labels
         if (this.showLabels) {
@@ -211,7 +241,10 @@ var AgentManager = function() {
 
     this.resetAgents = (numOfAgents) => {
         allSprites.clear();
+        this.selectedAgents = [];
+        this.lockedAgents = [];
         this.createMultipleAgents(numOfAgents);
+        this.calculateFormationTargets();
     };
 
     this.updateMaxSpeed = (newMaxSpeed) => {
@@ -287,5 +320,288 @@ var AgentManager = function() {
         }
 
         return totalVelocity / allSprites.length;
+    };
+
+    // Formation Control Methods
+    this.setFormation = (formationType) => {
+        this.formationType = formationType;
+        this.calculateFormationTargets();
+
+        // Show/hide formation size slider
+        const container = document.getElementById('formationSizeContainer');
+        if (formationType !== 'none') {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    };
+
+    this.setFormationSize = (size) => {
+        this.formationSize = size;
+        this.calculateFormationTargets();
+    };
+
+    this.calculateFormationTargets = () => {
+        if (this.formationType === 'none' || allSprites.length === 0) {
+            this.formationTargets = [];
+            return;
+        }
+
+        const n = allSprites.length;
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
+        const radius = this.formationSize;
+
+        this.formationTargets = [];
+
+        switch(this.formationType) {
+            case 'circle':
+                for (let i = 0; i < n; i++) {
+                    const angle = (TWO_PI / n) * i;
+                    this.formationTargets.push([
+                        centerX + radius * cos(angle),
+                        centerY + radius * sin(angle)
+                    ]);
+                }
+                break;
+
+            case 'line':
+                const spacing = radius * 2 / (n - 1);
+                for (let i = 0; i < n; i++) {
+                    this.formationTargets.push([
+                        centerX - radius + spacing * i,
+                        centerY
+                    ]);
+                }
+                break;
+
+            case 'triangle':
+                if (n >= 3) {
+                    for (let i = 0; i < n; i++) {
+                        const angle = (TWO_PI / 3) * (i % 3) - PI / 2;
+                        const r = radius * (1 + Math.floor(i / 3) * 0.5);
+                        this.formationTargets.push([
+                            centerX + r * cos(angle),
+                            centerY + r * sin(angle)
+                        ]);
+                    }
+                } else {
+                    // Fall back to circle for < 3 agents
+                    for (let i = 0; i < n; i++) {
+                        const angle = (TWO_PI / n) * i;
+                        this.formationTargets.push([
+                            centerX + radius * cos(angle),
+                            centerY + radius * sin(angle)
+                        ]);
+                    }
+                }
+                break;
+
+            case 'square':
+                if (n >= 4) {
+                    const perAgent = Math.ceil(n / 4);
+                    let idx = 0;
+                    // Top edge
+                    for (let i = 0; i < perAgent && idx < n; i++, idx++) {
+                        this.formationTargets.push([
+                            centerX - radius + (radius * 2 * i / (perAgent - 1 || 1)),
+                            centerY - radius
+                        ]);
+                    }
+                    // Right edge
+                    for (let i = 0; i < perAgent && idx < n; i++, idx++) {
+                        this.formationTargets.push([
+                            centerX + radius,
+                            centerY - radius + (radius * 2 * i / (perAgent - 1 || 1))
+                        ]);
+                    }
+                    // Bottom edge
+                    for (let i = 0; i < perAgent && idx < n; i++, idx++) {
+                        this.formationTargets.push([
+                            centerX + radius - (radius * 2 * i / (perAgent - 1 || 1)),
+                            centerY + radius
+                        ]);
+                    }
+                    // Left edge
+                    for (let i = 0; i < perAgent && idx < n; i++, idx++) {
+                        this.formationTargets.push([
+                            centerX - radius,
+                            centerY + radius - (radius * 2 * i / (perAgent - 1 || 1))
+                        ]);
+                    }
+                } else {
+                    // Fall back to circle
+                    for (let i = 0; i < n; i++) {
+                        const angle = (TWO_PI / n) * i;
+                        this.formationTargets.push([
+                            centerX + radius * cos(angle),
+                            centerY + radius * sin(angle)
+                        ]);
+                    }
+                }
+                break;
+
+            case 'grid':
+                const cols = Math.ceil(Math.sqrt(n));
+                const rows = Math.ceil(n / cols);
+                const spacingX = (radius * 2) / (cols - 1 || 1);
+                const spacingY = (radius * 2) / (rows - 1 || 1);
+                for (let i = 0; i < n; i++) {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    this.formationTargets.push([
+                        centerX - radius + col * spacingX,
+                        centerY - radius + row * spacingY
+                    ]);
+                }
+                break;
+        }
+    };
+
+    this.applyFormationControl = () => {
+        if (this.formationType === 'none' || this.formationTargets.length === 0) {
+            return;
+        }
+
+        // Apply formation forces
+        for (let i = 0; i < Math.min(allSprites.length, this.formationTargets.length); i++) {
+            if (this.isAgentLocked(i)) continue; // Skip locked agents
+
+            const sprite = allSprites[i];
+            const target = this.formationTargets[i];
+
+            const dx = target[0] - sprite.position.x;
+            const dy = target[1] - sprite.position.y;
+
+            // Add formation attraction force
+            const formationForce = 0.02; // Adjust this for stronger/weaker formation
+            sprite.velocity.x += dx * formationForce;
+            sprite.velocity.y += dy * formationForce;
+        }
+    };
+
+    this.drawFormationTargets = () => {
+        if (this.formationType === 'none' || this.formationTargets.length === 0) {
+            return;
+        }
+
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        stroke(isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)');
+        strokeWeight(1);
+        noFill();
+
+        // Draw target positions
+        for (let i = 0; i < this.formationTargets.length; i++) {
+            const target = this.formationTargets[i];
+            circle(target[0], target[1], this.agentSize * 1.5);
+        }
+
+        noStroke();
+    };
+
+    // Interaction Methods
+    this.setDragMode = (enabled) => {
+        this.dragMode = enabled;
+    };
+
+    this.getAgentAtPosition = (x, y) => {
+        for (let i = 0; i < allSprites.length; i++) {
+            const s = allSprites[i];
+            const dist = Math.sqrt((s.position.x - x) ** 2 + (s.position.y - y) ** 2);
+            if (dist < this.agentSize) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    this.startDragging = (agentIndex) => {
+        if (agentIndex >= 0 && agentIndex < allSprites.length) {
+            this.draggedAgent = agentIndex;
+        }
+    };
+
+    this.updateDrag = (x, y) => {
+        if (this.draggedAgent !== null && this.draggedAgent >= 0) {
+            allSprites[this.draggedAgent].position.x = x;
+            allSprites[this.draggedAgent].position.y = y;
+            allSprites[this.draggedAgent].velocity.x = 0;
+            allSprites[this.draggedAgent].velocity.y = 0;
+        }
+    };
+
+    this.stopDragging = () => {
+        this.draggedAgent = null;
+    };
+
+    this.deleteAgent = (agentIndex) => {
+        if (agentIndex >= 0 && agentIndex < allSprites.length) {
+            allSprites[agentIndex].remove();
+            this.agentTrails.splice(agentIndex, 1);
+            this.agentCount--;
+
+            // Update selected/locked arrays
+            this.selectedAgents = this.selectedAgents.filter(i => i !== agentIndex).map(i => i > agentIndex ? i - 1 : i);
+            this.lockedAgents = this.lockedAgents.filter(i => i !== agentIndex).map(i => i > agentIndex ? i - 1 : i);
+
+            this.calculateScene();
+            this.calculateFormationTargets();
+            updateAgentCountDisplay();
+        }
+    };
+
+    this.toggleSelection = (agentIndex) => {
+        const idx = this.selectedAgents.indexOf(agentIndex);
+        if (idx > -1) {
+            this.selectedAgents.splice(idx, 1);
+        } else {
+            this.selectedAgents.push(agentIndex);
+        }
+    };
+
+    this.toggleLock = (agentIndex) => {
+        const idx = this.lockedAgents.indexOf(agentIndex);
+        if (idx > -1) {
+            this.lockedAgents.splice(idx, 1);
+        } else {
+            this.lockedAgents.push(agentIndex);
+        }
+    };
+
+    this.isAgentSelected = (agentIndex) => {
+        return this.selectedAgents.includes(agentIndex);
+    };
+
+    this.isAgentLocked = (agentIndex) => {
+        return this.lockedAgents.includes(agentIndex);
+    };
+
+    this.drawSelectionIndicators = () => {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        noFill();
+        strokeWeight(2);
+
+        // Draw selection rings
+        for (let i = 0; i < this.selectedAgents.length; i++) {
+            const agentIndex = this.selectedAgents[i];
+            if (agentIndex < allSprites.length) {
+                const s = allSprites[agentIndex];
+                stroke(this.colors.selected);
+                circle(s.position.x, s.position.y, this.agentSize * 2.5);
+            }
+        }
+
+        // Draw lock indicators
+        for (let i = 0; i < this.lockedAgents.length; i++) {
+            const agentIndex = this.lockedAgents[i];
+            if (agentIndex < allSprites.length) {
+                const s = allSprites[agentIndex];
+                stroke(this.colors.locked);
+                strokeWeight(3);
+                circle(s.position.x, s.position.y, this.agentSize * 2);
+            }
+        }
+
+        noStroke();
     };
 };

@@ -263,7 +263,7 @@
                                 <i class="bi bi-info-circle info-icon" data-bs-toggle="tooltip"
                                    title="Network structure determining agent communication"></i>
                             </label>
-                            <select id="graphTopology" class="form-select" onchange="agentManager.updateStructure(parseInt(this.value))">
+                            <select id="graphTopology" class="form-select" onchange="AgentManager.updateStructure(parseInt(this.value))">
                                 <option value="0">Ring (Local)</option>
                                 <option value="1">Complete (Global)</option>
                                 <option value="2">Star</option>
@@ -271,6 +271,33 @@
                                 <option value="4">Random</option>
                                 <option value="5">Small World</option>
                             </select>
+                        </div>
+
+                        <!-- Formation Control -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Formation Type
+                                <i class="bi bi-info-circle info-icon" data-bs-toggle="tooltip"
+                                   title="Target formation shape for agents"></i>
+                            </label>
+                            <select id="formationType" class="form-select" onchange="AgentManager.setFormation(this.value)">
+                                <option value="none">Free Consensus</option>
+                                <option value="circle">Circle Formation</option>
+                                <option value="line">Line Formation</option>
+                                <option value="triangle">Triangle Formation</option>
+                                <option value="square">Square Formation</option>
+                                <option value="grid">Grid Formation</option>
+                            </select>
+                        </div>
+
+                        <!-- Formation Size -->
+                        <div class="range-container" id="formationSizeContainer" style="display: none;">
+                            <div class="range-label">
+                                <span>Formation Size</span>
+                                <span id="formationSizeValue">100</span>
+                            </div>
+                            <input type="range" class="form-range" min="50" max="200" value="100"
+                                   id="formationSizeSlider" oninput="SimControls.updateFormationSize(parseInt(this.value))">
                         </div>
 
                         <!-- Agent Count -->
@@ -309,16 +336,16 @@
                         <h6 class="mb-3">Display Options</h6>
 
                         <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="showLines"
-                    onchange="agentManager.setLineVisibility(this.checked)">
+                            <input class="form-check-input" type="checkbox" id="showLines"
+                                   onchange="AgentManager.setLineVisibility(this.checked)">
                             <label class="form-check-label" for="showLines">
                                 Show Communication Lines
                             </label>
                         </div>
 
                         <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="showTrails"
-                    onchange="agentManager.setTrailVisibility(this.checked)">
+                            <input class="form-check-input" type="checkbox" id="showTrails"
+                                   onchange="AgentManager.setTrailVisibility(this.checked)">
                             <label class="form-check-label" for="showTrails">
                                 Show Agent Trails
                             </label>
@@ -333,11 +360,29 @@
                         </div>
 
                         <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="showLabels" checked
-                    onchange="agentManager.setLabelVisibility(this.checked)">
+                            <input class="form-check-input" type="checkbox" id="showLabels" checked
+                                   onchange="AgentManager.setLabelVisibility(this.checked)">
                             <label class="form-check-label" for="showLabels">
                                 Show Agent Labels
                             </label>
+                        </div>
+
+                        <hr>
+
+                        <!-- Interaction Mode -->
+                        <h6 class="mb-3">Interaction Mode</h6>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="dragMode" checked
+                                   onchange="AgentManager.setDragMode(this.checked)">
+                            <label class="form-check-label" for="dragMode">
+                                Enable Drag & Drop Agents
+                            </label>
+                        </div>
+
+                        <div class="alert alert-info py-2 px-3 small mb-2" role="alert">
+                            <i class="bi bi-info-circle"></i> <strong>Tip:</strong>
+                            Right-click agents to delete • Click to select • Shift+Click to lock
                         </div>
 
                         <hr>

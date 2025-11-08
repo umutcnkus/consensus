@@ -34,6 +34,15 @@ function setup() {
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+
+    // Prevent context menu on canvas for right-click delete
+    const canvasElement = document.querySelector('canvas');
+    if (canvasElement) {
+        canvasElement.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            return false;
+        });
+    }
 }
 
 function draw() {
@@ -53,10 +62,50 @@ function draw() {
     updateMetrics();
 }
 
-function mouseClicked() {
+function mousePressed() {
     if (isMouseOnCanvas()) {
-    agentManager.createAgent(mouseX, mouseY);
-        updateAgentCountDisplay();
+        const agentIndex = AgentManager.getAgentAtPosition(mouseX, mouseY);
+
+        if (agentIndex >= 0) {
+            // Clicked on an agent
+            if (keyIsDown(SHIFT)) {
+                // Shift+Click: Toggle lock
+                AgentManager.toggleLock(agentIndex);
+            } else if (AgentManager.dragMode) {
+                // Start dragging
+                AgentManager.startDragging(agentIndex);
+            } else {
+                // Just select
+                AgentManager.toggleSelection(agentIndex);
+            }
+        } else if (!leaderMode) {
+            // Clicked on empty space - create new agent
+            AgentManager.createAgent(mouseX, mouseY);
+            updateAgentCountDisplay();
+        }
+    }
+}
+
+function mouseDragged() {
+    if (isMouseOnCanvas() && AgentManager.dragMode && AgentManager.draggedAgent !== null) {
+        AgentManager.updateDrag(mouseX, mouseY);
+        return false; // Prevent default
+    }
+}
+
+function mouseReleased() {
+    AgentManager.stopDragging();
+}
+
+function mouseClicked(event) {
+    if (isMouseOnCanvas()) {
+        const agentIndex = AgentManager.getAgentAtPosition(mouseX, mouseY);
+
+        // Right-click: Delete agent
+        if (event.button === 2 && agentIndex >= 0) {
+            AgentManager.deleteAgent(agentIndex);
+            return false; // Prevent context menu
+        }
     }
 }
 
@@ -271,13 +320,13 @@ const SimControls = {
     isRunning: true,
 
     start: function() {
-        agentManager.startScene();
+        AgentManager.startScene();
         this.isRunning = true;
         this.updateStatus();
     },
 
     stop: function() {
-        agentManager.stopScene();
+        AgentManager.stopScene();
         this.isRunning = false;
         this.updateStatus();
     },
@@ -299,23 +348,28 @@ const SimControls = {
     },
 
     randomize: function() {
-        agentManager.randomize();
+        AgentManager.randomize();
     },
 
     updateAgentCount: function(count) {
         document.getElementById('agentCountValue').textContent = count;
-        agentManager.resetAgents(count);
+        AgentManager.resetAgents(count);
         updateAgentCountDisplay();
     },
 
     updateMaxSpeed: function(speed) {
         document.getElementById('maxSpeedValue').textContent = speed;
-        agentManager.updateMaxSpeed(speed);
+        AgentManager.updateMaxSpeed(speed);
     },
 
     updateDistance: function(distance) {
         document.getElementById('distanceValue').textContent = distance;
-        agentManager.updateDistanceBetweenAgents(distance);
+        AgentManager.updateDistanceBetweenAgents(distance);
+    },
+
+    updateFormationSize: function(size) {
+        document.getElementById('formationSizeValue').textContent = size;
+        AgentManager.setFormationSize(size);
     },
 
     toggleLeaderMode: function(enabled) {
@@ -333,10 +387,12 @@ const SimControls = {
 
     saveState: function() {
         const state = {
-            agentCount: agentManager.agentCount,
-            maxSpeed: agentManager.maxSpeed,
-            distanceBetweenAgents: agentManager.distanceBetweenAgents,
-            structure: agentManager.structure,
+            agentCount: AgentManager.agentCount,
+            maxSpeed: AgentManager.maxSpeed,
+            distanceBetweenAgents: AgentManager.distanceBetweenAgents,
+            structure: AgentManager.structure,
+            formationType: AgentManager.formationType,
+            formationSize: AgentManager.formationSize,
             agents: allSprites.map(s => ({
                 x: s.position.x,
                 y: s.position.y
@@ -371,14 +427,23 @@ const SimControls = {
 
                 // Restore agents
                 state.agents.forEach(agent => {
-                    createSprite(agent.x, agent.y, agentManager.agentSize, agentManager.agentSize);
+                    createSprite(agent.x, agent.y, AgentManager.agentSize, AgentManager.agentSize);
                 });
 
                 // Restore parameters
-                agentManager.agentCount = state.agentCount;
-                agentManager.maxSpeed = state.maxSpeed;
-                agentManager.distanceBetweenAgents = state.distanceBetweenAgents;
-                agentManager.structure = state.structure;
+                AgentManager.agentCount = state.agentCount;
+                AgentManager.maxSpeed = state.maxSpeed;
+                AgentManager.distanceBetweenAgents = state.distanceBetweenAgents;
+                AgentManager.structure = state.structure;
+
+                // Restore formation if present
+                if (state.formationType) {
+                    AgentManager.formationType = state.formationType;
+                    AgentManager.formationSize = state.formationSize || 100;
+                    document.getElementById('formationType').value = state.formationType;
+                    document.getElementById('formationSizeSlider').value = state.formationSize || 100;
+                    AgentManager.setFormation(state.formationType);
+                }
 
                 // Update UI
                 document.getElementById('agentCountSlider').value = state.agentCount;
@@ -390,7 +455,7 @@ const SimControls = {
                 SimControls.updateMaxSpeed(state.maxSpeed);
                 SimControls.updateDistance(state.distanceBetweenAgents);
 
-                agentManager.calculateScene();
+                AgentManager.calculateScene();
             };
         };
 
