@@ -2,7 +2,7 @@
 let leaderMode = false;
 let canvasHeight = 500;
 let canvasWidth = window.innerWidth > 1200 ? window.innerWidth * 0.65 : window.innerWidth * 0.95;
-let AgentManager;
+let agentManager; // Instance of AgentManager (constructor is in agent.js)
 let metricsChart;
 let metricsData = {
     time: [],
@@ -17,6 +17,10 @@ let panY = 0;
 let showFPSCounter = false;
 let fpsHistory = [];
 let lastFrameTime = 0;
+
+// Expose to window for inline handlers
+window.agentManager = null;
+window.SimControls = null;
 
 // Initialize on page load
 function setup() {
@@ -75,13 +79,13 @@ function draw() {
     scale(zoomLevel);
 
     // Show agents and update visualization
-    AgentManager.showAgents();
+    agentManager.showAgents();
 
     // Leader following mode
     if (leaderMode && isMouseOnCanvas()) {
         const adjustedX = (mouseX - panX) / zoomLevel;
         const adjustedY = (mouseY - panY) / zoomLevel;
-        AgentManager.setLeaderPosition(adjustedX, adjustedY);
+        agentManager.setLeaderPosition(adjustedX, adjustedY);
     }
 
     pop();
@@ -95,27 +99,27 @@ function mousePressed() {
         // Adjust mouse position for zoom
         const adjustedX = (mouseX - panX) / zoomLevel;
         const adjustedY = (mouseY - panY) / zoomLevel;
-        const agentIndex = AgentManager.getAgentAtPosition(adjustedX, adjustedY);
+        const agentIndex = agentManager.getAgentAtPosition(adjustedX, adjustedY);
 
         if (agentIndex >= 0) {
             // Clicked on an agent
             if (mouseButton === RIGHT) {
                 // Right-click: Delete agent
-                AgentManager.deleteAgent(agentIndex);
+                agentManager.deleteAgent(agentIndex);
                 return false; // Prevent context menu
             } else if (keyIsDown(SHIFT)) {
                 // Shift+Click: Toggle lock
-                AgentManager.toggleLock(agentIndex);
-            } else if (AgentManager.dragMode && mouseButton === LEFT) {
+                agentManager.toggleLock(agentIndex);
+            } else if (agentManager.dragMode && mouseButton === LEFT) {
                 // Start dragging
-                AgentManager.startDragging(agentIndex);
+                agentManager.startDragging(agentIndex);
             } else {
                 // Just select
-                AgentManager.toggleSelection(agentIndex);
+                agentManager.toggleSelection(agentIndex);
             }
         } else if (!leaderMode && mouseButton === LEFT) {
             // Clicked on empty space - create new agent
-            AgentManager.createAgent(adjustedX, adjustedY);
+            agentManager.createAgent(adjustedX, adjustedY);
             updateAgentCountDisplay();
         }
     }
@@ -123,17 +127,17 @@ function mousePressed() {
 }
 
 function mouseDragged() {
-    if (isMouseOnCanvas() && AgentManager.dragMode && AgentManager.draggedAgent !== null) {
+    if (isMouseOnCanvas() && agentManager.dragMode && agentManager.draggedAgent !== null) {
         // Adjust for zoom
         const adjustedX = (mouseX - panX) / zoomLevel;
         const adjustedY = (mouseY - panY) / zoomLevel;
-        AgentManager.updateDrag(adjustedX, adjustedY);
+        agentManager.updateDrag(adjustedX, adjustedY);
         return false; // Prevent default
     }
 }
 
 function mouseReleased() {
-    AgentManager.stopDragging();
+    agentManager.stopDragging();
 }
 
 function isMouseOnCanvas() {
@@ -272,11 +276,11 @@ function updateMetrics() {
     if (frameCounter % 10 !== 0) return;
 
     // Calculate convergence error
-    const convergenceError = AgentManager.calculateConvergenceError();
+    const convergenceError = agentManager.calculateConvergenceError();
     document.getElementById('convergenceError').textContent = convergenceError.toFixed(2);
 
     // Calculate average velocity
-    const avgVelocity = AgentManager.calculateAverageVelocity();
+    const avgVelocity = agentManager.calculateAverageVelocity();
     document.getElementById('avgVelocity').textContent = avgVelocity.toFixed(2);
 
     // Update chart data
@@ -300,8 +304,8 @@ function updateMetrics() {
 }
 
 function updateAgentCountDisplay() {
-    document.getElementById('agentCount').textContent = AgentManager.agentCount;
-    document.getElementById('agentCountValue').textContent = AgentManager.agentCount;
+    document.getElementById('agentCount').textContent = agentManager.agentCount;
+    document.getElementById('agentCountValue').textContent = agentManager.agentCount;
 }
 
 // Setup event listeners
@@ -373,13 +377,13 @@ const SimControls = {
     isRunning: true,
 
     start: function() {
-        AgentManager.startScene();
+        agentManager.startScene();
         this.isRunning = true;
         this.updateStatus();
     },
 
     stop: function() {
-        AgentManager.stopScene();
+        agentManager.stopScene();
         this.isRunning = false;
         this.updateStatus();
     },
@@ -401,28 +405,28 @@ const SimControls = {
     },
 
     randomize: function() {
-        AgentManager.randomize();
+        agentManager.randomize();
     },
 
     updateAgentCount: function(count) {
         document.getElementById('agentCountValue').textContent = count;
-        AgentManager.resetAgents(count);
+        agentManager.resetAgents(count);
         updateAgentCountDisplay();
     },
 
     updateMaxSpeed: function(speed) {
         document.getElementById('maxSpeedValue').textContent = speed;
-        AgentManager.updateMaxSpeed(speed);
+        agentManager.updateMaxSpeed(speed);
     },
 
     updateDistance: function(distance) {
         document.getElementById('distanceValue').textContent = distance;
-        AgentManager.updateDistanceBetweenAgents(distance);
+        agentManager.updateDistanceBetweenAgents(distance);
     },
 
     updateFormationSize: function(size) {
         document.getElementById('formationSizeValue').textContent = size;
-        AgentManager.setFormationSize(size);
+        agentManager.setFormationSize(size);
     },
 
     toggleLeaderMode: function(enabled) {
@@ -430,7 +434,7 @@ const SimControls = {
     },
 
     toggleGrid: function(enabled) {
-        AgentManager.setGridVisibility(enabled);
+        agentManager.setGridVisibility(enabled);
     },
 
     toggleFPS: function(enabled) {
@@ -443,12 +447,12 @@ const SimControls = {
 
     updateAgentSize: function(size) {
         document.getElementById('agentSizeValue').textContent = size;
-        AgentManager.updateAgentSize(size);
+        agentManager.updateAgentSize(size);
     },
 
     updateTrailLength: function(length) {
         document.getElementById('trailLengthValue').textContent = length;
-        AgentManager.updateTrailLength(length);
+        agentManager.updateTrailLength(length);
     },
 
     zoomIn: function() {
@@ -491,12 +495,12 @@ const SimControls = {
 
     saveState: function() {
         const state = {
-            agentCount: AgentManager.agentCount,
-            maxSpeed: AgentManager.maxSpeed,
-            distanceBetweenAgents: AgentManager.distanceBetweenAgents,
-            structure: AgentManager.structure,
-            formationType: AgentManager.formationType,
-            formationSize: AgentManager.formationSize,
+            agentCount: agentManager.agentCount,
+            maxSpeed: agentManager.maxSpeed,
+            distanceBetweenAgents: agentManager.distanceBetweenAgents,
+            structure: agentManager.structure,
+            formationType: agentManager.formationType,
+            formationSize: agentManager.formationSize,
             agents: allSprites.map(s => ({
                 x: s.position.x,
                 y: s.position.y
@@ -531,22 +535,22 @@ const SimControls = {
 
                 // Restore agents
                 state.agents.forEach(agent => {
-                    createSprite(agent.x, agent.y, AgentManager.agentSize, AgentManager.agentSize);
+                    createSprite(agent.x, agent.y, agentManager.agentSize, agentManager.agentSize);
                 });
 
                 // Restore parameters
-                AgentManager.agentCount = state.agentCount;
-                AgentManager.maxSpeed = state.maxSpeed;
-                AgentManager.distanceBetweenAgents = state.distanceBetweenAgents;
-                AgentManager.structure = state.structure;
+                agentManager.agentCount = state.agentCount;
+                agentManager.maxSpeed = state.maxSpeed;
+                agentManager.distanceBetweenAgents = state.distanceBetweenAgents;
+                agentManager.structure = state.structure;
 
                 // Restore formation if present
                 if (state.formationType) {
-                    AgentManager.formationType = state.formationType;
-                    AgentManager.formationSize = state.formationSize || 100;
+                    agentManager.formationType = state.formationType;
+                    agentManager.formationSize = state.formationSize || 100;
                     document.getElementById('formationType').value = state.formationType;
                     document.getElementById('formationSizeSlider').value = state.formationSize || 100;
-                    AgentManager.setFormation(state.formationType);
+                    agentManager.setFormation(state.formationType);
                 }
 
                 // Update UI
@@ -559,7 +563,7 @@ const SimControls = {
                 SimControls.updateMaxSpeed(state.maxSpeed);
                 SimControls.updateDistance(state.distanceBetweenAgents);
 
-                AgentManager.calculateScene();
+                agentManager.calculateScene();
             };
         };
 
