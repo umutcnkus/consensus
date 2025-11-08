@@ -56,8 +56,7 @@ var AgentManager = function() {
         sprite.shapeColor = color(this.colors.follower);
         sprite.draw = function() {
             // Custom draw function for better visuals
-            push();
-            translate(this.position.x, this.position.y);
+            // p5.play already translates to sprite position, so draw at 0,0
 
             // Draw shadow/glow
             noStroke();
@@ -74,8 +73,6 @@ var AgentManager = function() {
             noStroke();
             fill(255, 255, 255, 80);
             ellipse(-this.width * 0.15, -this.height * 0.15, this.width * 0.4, this.height * 0.4);
-
-            pop();
         };
 
         this.agentCount += 1;
@@ -92,8 +89,7 @@ var AgentManager = function() {
             sprite.shapeColor = color(this.colors.follower);
             sprite.draw = function() {
                 // Custom draw function for better visuals
-                push();
-                translate(this.position.x, this.position.y);
+                // p5.play already translates to sprite position, so draw at 0,0
 
                 // Draw shadow/glow
                 noStroke();
@@ -110,8 +106,6 @@ var AgentManager = function() {
                 noStroke();
                 fill(255, 255, 255, 80);
                 ellipse(-this.width * 0.15, -this.height * 0.15, this.width * 0.4, this.height * 0.4);
-
-                pop();
             };
             this.agentTrails.push([]);
         }
@@ -595,7 +589,8 @@ var AgentManager = function() {
         // Draw target positions
         for (let i = 0; i < this.formationTargets.length; i++) {
             const target = this.formationTargets[i];
-            circle(target[0], target[1], this.agentSize * 1.5);
+            const diameter = this.agentSize * 1.5;
+            ellipse(target[0], target[1], diameter, diameter);
         }
 
         noStroke();
@@ -689,7 +684,8 @@ var AgentManager = function() {
             if (agentIndex < allSprites.length) {
                 const s = allSprites[agentIndex];
                 stroke(this.colors.selected);
-                circle(s.position.x, s.position.y, this.agentSize * 2.5);
+                const diameter = this.agentSize * 2.5;
+                ellipse(s.position.x, s.position.y, diameter, diameter);
             }
         }
 
@@ -700,7 +696,8 @@ var AgentManager = function() {
                 const s = allSprites[agentIndex];
                 stroke(this.colors.locked);
                 strokeWeight(3);
-                circle(s.position.x, s.position.y, this.agentSize * 2);
+                const diameter = this.agentSize * 2;
+                ellipse(s.position.x, s.position.y, diameter, diameter);
             }
         }
 
