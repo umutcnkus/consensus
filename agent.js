@@ -178,6 +178,11 @@ var AgentManager = function() {
         const distances_y = numeric.dot(this.laplacian, this.distances_y);
         this.velocity_x = numeric.add(d_x, distances_x);
         this.velocity_y = numeric.add(d_y, distances_y);
+
+        // Debug: log consensus vs distance forces
+        if (frameCount % 60 === 0) {
+            console.log('Consensus force (d_x[0]):', d_x[0][0], 'Distance force:', distances_x[0][0]);
+        }
     };
 
     this.updateVelocities = () => {
@@ -356,7 +361,9 @@ var AgentManager = function() {
 
     this.updateStructure = (newStructure) => {
         this.structure = newStructure;
+        console.log('Structure updated to:', newStructure);
         this.calculateScene();
+        console.log('Laplacian matrix:', this.laplacian);
     };
 
     this.setLeaderPosition = (x, y) => {
