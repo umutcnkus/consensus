@@ -2,7 +2,7 @@
 let leaderMode = false;
 let canvasHeight = 500;
 let canvasWidth = window.innerWidth > 1200 ? window.innerWidth * 0.65 : window.innerWidth * 0.95;
-let AgentManager;
+let agentManager;
 let metricsChart;
 let metricsData = {
     time: [],
@@ -18,11 +18,12 @@ function setup() {
     canvas.parent('canvas-container');
 
     // Initialize Agent Manager
-    AgentManager = new AgentManager();
-    AgentManager.showLinesBetweenAgents = false;
-    AgentManager.showTrails = false;
-    AgentManager.showLabels = true;
-    AgentManager.initialize();
+    agentManager = new AgentManager();
+    agentManager.showLinesBetweenAgents = false;
+    agentManager.showTrails = false;
+    agentManager.showLabels = true;
+    agentManager.initialize();
+    window.agentManager = agentManager;
 
     // Initialize Chart
     initializeChart();
@@ -41,11 +42,11 @@ function draw() {
     background(isDarkMode ? 30 : 200);
 
     // Show agents and update visualization
-    AgentManager.showAgents();
+    agentManager.showAgents();
 
     // Leader following mode
     if (leaderMode && isMouseOnCanvas()) {
-        AgentManager.setLeaderPosition(mouseX, mouseY);
+    agentManager.setLeaderPosition(mouseX, mouseY);
     }
 
     // Update metrics every frame
@@ -54,7 +55,7 @@ function draw() {
 
 function mouseClicked() {
     if (isMouseOnCanvas()) {
-        AgentManager.createAgent(mouseX, mouseY);
+    agentManager.createAgent(mouseX, mouseY);
         updateAgentCountDisplay();
     }
 }
@@ -82,12 +83,12 @@ function keyPressed() {
         // L - Toggle Lines
         const checkbox = document.getElementById('showLines');
         checkbox.checked = !checkbox.checked;
-        AgentManager.setLineVisibility(checkbox.checked);
+    agentManager.setLineVisibility(checkbox.checked);
     } else if (key === 't' || key === 'T') {
         // T - Toggle Trails
         const checkbox = document.getElementById('showTrails');
         checkbox.checked = !checkbox.checked;
-        AgentManager.setTrailVisibility(checkbox.checked);
+    agentManager.setTrailVisibility(checkbox.checked);
     } else if (key === '?') {
         // ? - Show Help
         const modal = new bootstrap.Modal(document.getElementById('helpModal'));
@@ -195,11 +196,11 @@ function updateMetrics() {
     if (frameCounter % 10 !== 0) return;
 
     // Calculate convergence error
-    const convergenceError = AgentManager.calculateConvergenceError();
+    const convergenceError = agentManager.calculateConvergenceError();
     document.getElementById('convergenceError').textContent = convergenceError.toFixed(2);
 
     // Calculate average velocity
-    const avgVelocity = AgentManager.calculateAverageVelocity();
+    const avgVelocity = agentManager.calculateAverageVelocity();
     document.getElementById('avgVelocity').textContent = avgVelocity.toFixed(2);
 
     // Update chart data
@@ -223,8 +224,8 @@ function updateMetrics() {
 }
 
 function updateAgentCountDisplay() {
-    document.getElementById('agentCount').textContent = AgentManager.agentCount;
-    document.getElementById('agentCountValue').textContent = AgentManager.agentCount;
+    document.getElementById('agentCount').textContent = agentManager.agentCount;
+    document.getElementById('agentCountValue').textContent = agentManager.agentCount;
 }
 
 // Setup event listeners
@@ -270,13 +271,13 @@ const SimControls = {
     isRunning: true,
 
     start: function() {
-        AgentManager.startScene();
+        agentManager.startScene();
         this.isRunning = true;
         this.updateStatus();
     },
 
     stop: function() {
-        AgentManager.stopScene();
+        agentManager.stopScene();
         this.isRunning = false;
         this.updateStatus();
     },
@@ -298,23 +299,23 @@ const SimControls = {
     },
 
     randomize: function() {
-        AgentManager.randomize();
+        agentManager.randomize();
     },
 
     updateAgentCount: function(count) {
         document.getElementById('agentCountValue').textContent = count;
-        AgentManager.resetAgents(count);
+        agentManager.resetAgents(count);
         updateAgentCountDisplay();
     },
 
     updateMaxSpeed: function(speed) {
         document.getElementById('maxSpeedValue').textContent = speed;
-        AgentManager.updateMaxSpeed(speed);
+        agentManager.updateMaxSpeed(speed);
     },
 
     updateDistance: function(distance) {
         document.getElementById('distanceValue').textContent = distance;
-        AgentManager.updateDistanceBetweenAgents(distance);
+        agentManager.updateDistanceBetweenAgents(distance);
     },
 
     toggleLeaderMode: function(enabled) {
@@ -332,10 +333,10 @@ const SimControls = {
 
     saveState: function() {
         const state = {
-            agentCount: AgentManager.agentCount,
-            maxSpeed: AgentManager.maxSpeed,
-            distanceBetweenAgents: AgentManager.distanceBetweenAgents,
-            structure: AgentManager.structure,
+            agentCount: agentManager.agentCount,
+            maxSpeed: agentManager.maxSpeed,
+            distanceBetweenAgents: agentManager.distanceBetweenAgents,
+            structure: agentManager.structure,
             agents: allSprites.map(s => ({
                 x: s.position.x,
                 y: s.position.y
@@ -370,14 +371,14 @@ const SimControls = {
 
                 // Restore agents
                 state.agents.forEach(agent => {
-                    createSprite(agent.x, agent.y, AgentManager.agentSize, AgentManager.agentSize);
+                    createSprite(agent.x, agent.y, agentManager.agentSize, agentManager.agentSize);
                 });
 
                 // Restore parameters
-                AgentManager.agentCount = state.agentCount;
-                AgentManager.maxSpeed = state.maxSpeed;
-                AgentManager.distanceBetweenAgents = state.distanceBetweenAgents;
-                AgentManager.structure = state.structure;
+                agentManager.agentCount = state.agentCount;
+                agentManager.maxSpeed = state.maxSpeed;
+                agentManager.distanceBetweenAgents = state.distanceBetweenAgents;
+                agentManager.structure = state.structure;
 
                 // Update UI
                 document.getElementById('agentCountSlider').value = state.agentCount;
@@ -389,7 +390,7 @@ const SimControls = {
                 SimControls.updateMaxSpeed(state.maxSpeed);
                 SimControls.updateDistance(state.distanceBetweenAgents);
 
-                AgentManager.calculateScene();
+                agentManager.calculateScene();
             };
         };
 
@@ -412,3 +413,5 @@ const SimControls = {
         linkElement.click();
     }
 };
+
+window.SimControls = SimControls;

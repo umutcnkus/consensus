@@ -263,7 +263,7 @@
                                 <i class="bi bi-info-circle info-icon" data-bs-toggle="tooltip"
                                    title="Network structure determining agent communication"></i>
                             </label>
-                            <select id="graphTopology" class="form-select" onchange="AgentManager.updateStructure(parseInt(this.value))">
+                            <select id="graphTopology" class="form-select" onchange="agentManager.updateStructure(parseInt(this.value))">
                                 <option value="0">Ring (Local)</option>
                                 <option value="1">Complete (Global)</option>
                                 <option value="2">Star</option>
@@ -309,16 +309,16 @@
                         <h6 class="mb-3">Display Options</h6>
 
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="showLines"
-                                   onchange="AgentManager.setLineVisibility(this.checked)">
+                <input class="form-check-input" type="checkbox" id="showLines"
+                    onchange="agentManager.setLineVisibility(this.checked)">
                             <label class="form-check-label" for="showLines">
                                 Show Communication Lines
                             </label>
                         </div>
 
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="showTrails"
-                                   onchange="AgentManager.setTrailVisibility(this.checked)">
+                <input class="form-check-input" type="checkbox" id="showTrails"
+                    onchange="agentManager.setTrailVisibility(this.checked)">
                             <label class="form-check-label" for="showTrails">
                                 Show Agent Trails
                             </label>
@@ -333,8 +333,8 @@
                         </div>
 
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="showLabels" checked
-                                   onchange="AgentManager.setLabelVisibility(this.checked)">
+                <input class="form-check-input" type="checkbox" id="showLabels" checked
+                    onchange="agentManager.setLabelVisibility(this.checked)">
                             <label class="form-check-label" for="showLabels">
                                 Show Agent Labels
                             </label>

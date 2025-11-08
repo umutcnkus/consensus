@@ -30,7 +30,7 @@ var AgentManager = function() {
 
     this.initialize = () => {
         for (let i = 0; i < 3; i++) {
-            AgentManager.createAgent(random(canvasWidth), random(canvasHeight));
+            this.createAgent(random(canvasWidth), random(canvasHeight));
         }
     };
 
