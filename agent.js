@@ -174,14 +174,23 @@ var AgentManager = function() {
     this.calculateVelocities = () => {
         const d_x = numeric.dot(this.laplacian, this.position_x);
         const d_y = numeric.dot(this.laplacian, this.position_y);
-        const distances_x = numeric.dot(this.laplacian, this.distances_x);
-        const distances_y = numeric.dot(this.laplacian, this.distances_y);
-        this.velocity_x = numeric.add(d_x, distances_x);
-        this.velocity_y = numeric.add(d_y, distances_y);
+
+        // Only add distance-based formation forces if distance > 0
+        // Otherwise, use pure consensus (agents converge to average)
+        if (this.distanceBetweenAgents > 0) {
+            const distances_x = numeric.dot(this.laplacian, this.distances_x);
+            const distances_y = numeric.dot(this.laplacian, this.distances_y);
+            this.velocity_x = numeric.add(d_x, distances_x);
+            this.velocity_y = numeric.add(d_y, distances_y);
+        } else {
+            // Pure consensus - no formation forces
+            this.velocity_x = d_x;
+            this.velocity_y = d_y;
+        }
 
         // Debug: log consensus vs distance forces
         if (frameCount % 60 === 0) {
-            console.log('Consensus force (d_x[0]):', d_x[0][0], 'Distance force:', distances_x[0][0]);
+            console.log('Distance setting:', this.distanceBetweenAgents, 'Consensus force:', d_x[0][0]);
         }
     };
 
